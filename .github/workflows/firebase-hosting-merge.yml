@@ -24,20 +24,19 @@ jobs:
       - name: Build
         run: npm run build
 
+      # Service account JSON'u kullanarak kimlik doğrulama
       - name: Authenticate with service account
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_DOSYA_TAKIP_SISTEMI_888BB }}
           GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/gcloud.json
         run: |
-          # Service account JSON'u dosyaya yaz
           echo "$FIREBASE_SERVICE_ACCOUNT" > "$GOOGLE_APPLICATION_CREDENTIALS"
-          # Firebase CLI
           curl -sL https://firebase.tools | bash
 
+      # Sabit proje ID'siyle deploy (yanlış projeye gitme riski yok)
       - name: Deploy to Firebase Hosting
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/gcloud.json
         run: |
-          # Proje ID'sini .firebaserc içinden oku (default tanımı varsa)
-          PROJECT_ID=$(node -e "console.log(JSON.parse(require('fs').readFileSync('.firebaserc','utf8')).projects.default)")
-          npx firebase deploy --only hosting --non-interactive --force --project "$PROJECT_ID"
+          npx firebase deploy --only hosting --non-interactive --force \
+            --project dosya-takip-sistemi-888bb
