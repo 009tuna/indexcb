@@ -25,18 +25,21 @@ jobs:
         run: npm run build
 
       - name: Authenticate with service account
-        # Secret adın farklıysa burayı değiştir
         env:
+          # Secret adı GitHub → Settings → Secrets → Actions'ta birebir aynı olmalı
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_DOSYA_TAKIP_SISTEMI_888BB }}
         run: |
           # Service account JSON'u dosyaya yaz
           echo "$FIREBASE_SERVICE_ACCOUNT" > "$HOME/gcloud.json"
           # Sonraki adımlar için env olarak yayınla
           echo "GOOGLE_APPLICATION_CREDENTIALS=$HOME/gcloud.json" >> "$GITHUB_ENV"
-          # Firebase CLI (standalone) kur
+          # Standalone Firebase CLI kur
           curl -sL https://firebase.tools | bash
 
       - name: Deploy to Firebase Hosting
         run: |
+          # Framework-aware Hosting için gerekli deneysel özelliği CI ortamında aç
+          firebase experiments:enable webframeworks
+          # Sabit proje ID'si ile deploy (yanlış projeye gitmesin)
           firebase deploy --only hosting --non-interactive --force \
             --project dosya-takip-sistemi-888bb
